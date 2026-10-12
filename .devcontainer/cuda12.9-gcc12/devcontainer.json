@@ -21,6 +21,11 @@
     "-c",
     "if [ ${CODESPACES:-false} = 'true' ]; then . devcontainer-utils-post-attach-command; fi"
   ],
+  "postStartCommand": [
+    "/bin/bash",
+    "-c",
+    "if test -z \"${localEnv:WSLENV}\" && test \"${CCCL_CUDA_LATEST:-false}\" = 'true'; then sudo apt-get update && sudo apt-get install -y cuda-compat-\"${CCCL_CUDA_VERSION/./-}\"; fi"
+  ],
   "containerEnv": {
     "AWS_IDP_URL": "https://token.rapids.nvidia.com",
     "AWS_ROLE_ARN": "arn:aws:iam::279114543810:role/rapids-token-sccache-devs",
@@ -42,7 +47,8 @@
     "CCCL_HOST_COMPILER_VERSION": "12",
     "CCCL_BUILD_INFIX": "cuda12.9-gcc12",
     "CCCL_CUDA_EXTENDED": "false",
-    "HOST_WORKSPACE": "${localWorkspaceFolder}"
+    "HOST_WORKSPACE": "${localWorkspaceFolder}",
+    "CCCL_CUDA_LATEST": "false"
   },
   "workspaceFolder": "/home/coder/cccl",
   "workspaceMount": "source=${localWorkspaceFolder},target=/home/coder/cccl,type=bind",

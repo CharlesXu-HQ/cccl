@@ -63,6 +63,11 @@ update_devcontainer() {
 
     local image="${img}${compiler_name}${compiler_version}${toolkit_name}"
 
+    local cuda_latest="false"
+    if [[ "$cuda_version" == "$LATEST_CUDA" ]]; then
+        cuda_latest="true"
+    fi
+
     jq --arg image "$image" \
        --arg name "$name" \
        --arg cuda_version "$cuda_version" \
@@ -70,6 +75,7 @@ update_devcontainer() {
        --arg compiler_name "$compiler_name" \
        --arg compiler_exe "$compiler_exe" \
        --arg compiler_version "$compiler_version" \
+       --arg cuda_latest "$cuda_latest" \
        --arg container_name "\${localEnv:USER:anon}-\${localWorkspaceFolderBasename}-${name}" \
        '.image = $image |
         .name = $name |
@@ -77,6 +83,7 @@ update_devcontainer() {
         .containerEnv.DEVCONTAINER_NAME = $name |
         .containerEnv.CCCL_BUILD_INFIX = $name |
         .containerEnv.CCCL_CUDA_VERSION = $cuda_version |
+        .containerEnv.CCCL_CUDA_LATEST = $cuda_latest |
         .containerEnv.CCCL_CUDA_EXTENDED = $cuda_ext |
         .containerEnv.CCCL_HOST_COMPILER = $compiler_name |
         .containerEnv.CCCL_HOST_COMPILER_VERSION = $compiler_version' \
@@ -156,6 +163,11 @@ readonly CUDA99_LLVM_VERSION
 # Get unique combinations of cuda version, compiler name/version, and Ubuntu version
 combinations=$(echo "$matrix_json" | jq -c '.combinations[]')
 readonly combinations
+
+# The latest CUDA toolkit version in the matrix. Only devcontainers using this
+# CTK version install the cuda-compat package (see postStartCommand in devcontainer.json).
+LATEST_CUDA=$(echo "$matrix_json" | jq -r '[.combinations[].cuda] | unique | sort_by(split(".") | map(tonumber)) | last')
+readonly LATEST_CUDA
 
 # Update the base devcontainer with the default values
 # The root devcontainer.json file is used as the default container as well as a template for all
