@@ -36,6 +36,10 @@ fi
 
 cd /home/coder/cccl/
 
+# Install and configure cuda-compat for containers using the latest CUDA toolkit.
+# This is a no-op on WSL hosts and for non-latest CUDA toolkits.
+./.devcontainer/setup-cuda-compat.sh
+
 if test $# -gt 0; then
     exec "$@";
 else
